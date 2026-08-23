@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Ledger is an all-in-one student study toolkit: planner, assignments, timetable, exam countdowns, GPA/CGPA and attendance calculators, notes, flashcards, quizzes and a Pomodoro timer — all saved locally in your browser.">
+<meta name="theme-color" content="#4338CA">
+<meta property="og:title" content="Ledger — Student Study Toolkit">
+<meta property="og:description" content="An all-in-one, local-first study toolkit for students: planner, GPA/CGPA and attendance calculators, notes, flashcards, quizzes, and a Pomodoro timer. No sign-up, nothing leaves your browser.">
+<meta property="og:type" content="website">
+<title>Ledger — Student Study Toolkit</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='32' y2='32'%3E%3Cstop offset='0' stop-color='%234338CA'/%3E%3Cstop offset='1' stop-color='%237C3AED'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='url(%23g)'/%3E%3Cpath d='M6 22.5c3.6-2 8-2 10 .4 2-2.4 6.4-2.4 10-.4V11c-3.6-2-8-2-10 .4C14 9 9.6 9 6 11v11.5Z' fill='%23fff' fill-opacity='.94'/%3E%3Cpath d='M9 16.2l4-5 3 3.4L22 8' stroke='%2314B8A6' stroke-width='2.3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='22.4' cy='7.3' r='1.7' fill='%2314B8A6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<noscript>
+  <div style="position:fixed;inset:0;background:#F3F6FB;color:#1F2430;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:sans-serif;z-index:9999;">
+    <div>
+      <h1 style="margin:0 0 8px;">JavaScript is required</h1>
+      <p>Ledger is a local, in-browser study toolkit and needs JavaScript enabled to run. Please enable JavaScript and reload the page.</p>
+    </div>
+  </div>
+</noscript>
+
+<!-- ============ LOADING SCREEN ============ -->
+<div id="loadingScreen" class="loading-screen" aria-hidden="true">
+  <div class="loading-ring"></div>
+  <p class="loading-text">Opening Ledger…</p>
+</div>
+
+<!-- ============ TOAST CONTAINER ============ -->
+<div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+<!-- ============ CONFIRM MODAL ============ -->
+<div id="confirmModal" class="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <h3 id="confirmTitle">Are you sure?</h3>
+    <p id="confirmMessage">This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="confirmCancelBtn">Cancel</button>
+      <button class="btn btn-danger" id="confirmOkBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MOBILE OVERLAY ============ -->
+<div id="mobileOverlay" class="mobile-overlay" hidden></div>
+
+<!-- ============ LOGIN / WELCOME SCREEN ============ -->
+<div class="login-screen" id="loginScreen" hidden>
+  <div class="login-shell">
+
+    <aside class="login-aside">
+      <div class="login-aside-inner">
+        <div class="login-aside-logo">
+          <svg viewBox="0 0 32 32" width="34" height="34">
+            <defs><linearGradient id="markLoginAside" x1="0" y1="0" x2="32" y2="32"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D6F5F0"/></linearGradient></defs>
+            <rect width="32" height="32" rx="9" fill="rgba(255,255,255,0.16)"/>
+            <path d="M6 22.5c3.6-2 8-2 10 .4 2-2.4 6.4-2.4 10-.4V11c-3.6-2-8-2-10 .4C14 9 9.6 9 6 11v11.5Z" fill="url(#markLoginAside)"/>
+            <path d="M9 16.2l4-5 3 3.4L22 8" stroke="#14B8A6" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="22.4" cy="7.3" r="1.7" fill="#14B8A6"/>
+          </svg>
+          <span class="login-aside-brand">Ledger</span>
+        </div>
+        <p class="login-aside-tagline">Learn. Plan. Achieve.</p>
+        <h2 class="login-aside-heading">Your whole semester, organized in one place.</h2>
+        <ul class="login-feature-list">
+          <li><span class="login-feature-icon">✓</span>GPA, CGPA &amp; attendance tracking</li>
+          <li><span class="login-feature-icon">✓</span>Assignments, timetable &amp; exam countdowns</li>
+          <li><span class="login-feature-icon">✓</span>Flashcards, quizzes &amp; a focus timer</li>
+          <li><span class="login-feature-icon">✓</span>Everything saved on your device — no sign-up required</li>
+        </ul>
+        <p class="login-aside-quote" id="loginQuote">"Small, consistent effort beats last-minute cramming."</p>
+      </div>
+    </aside>
+
+    <main class="login-main">
+      <div class="login-card">
+
+        <div class="login-card-logo-mobile" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="30" height="30">
+            <defs><linearGradient id="markLoginMobile" x1="0" y1="0" x2="32" y2="32"><stop offset="0" stop-color="#4338CA"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+            <rect width="32" height="32" rx="9" fill="url(#markLoginMobile)"/>
+            <path d="M6 22.5c3.6-2 8-2 10 .4 2-2.4 6.4-2.4 10-.4V11c-3.6-2-8-2-10 .4C14 9 9.6 9 6 11v11.5Z" fill="#fff" fill-opacity="0.94"/>
+            <path d="M9 16.2l4-5 3 3.4L22 8" stroke="#14B8A6" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="22.4" cy="7.3" r="1.7" fill="#14B8A6"/>
+          </svg>
+          <span>Ledger</span>
+        </div>
+
+        <!-- ---- LOG IN PANEL ---- -->
+        <section class="login-panel" id="loginPanel">
+          <h1>Welcome back</h1>
+          <p class="login-sub">Ready to make today productive?</p>
+
+          <div class="login-demo-notice">
+            <strong>Demo mode.</strong> This is a frontend-only prototype — there's no real backend, so any password is accepted. Nothing is verified or sent anywhere.
+          </div>
+
+          <form id="loginForm" class="login-form" novalidate>
+            <div class="field">
+              <label for="loginIdentifier">Name or email</label>
+              <input id="loginIdentifier" type="text" required placeholder="e.g. Ayesha Khan" autocomplete="username">
+            </div>
+            <div class="field">
+              <label for="loginPassword">Password</label>
+              <div class="password-field">
+                <input id="loginPassword" type="password" required placeholder="Enter any password" autocomplete="current-password">
+                <button type="button" class="password-toggle" id="loginPasswordToggle" aria-label="Show password">
+                  <svg class="pw-eye-open" viewBox="0 0 24 24"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+                  <svg class="pw-eye-closed" viewBox="0 0 24 24" hidden><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.24 4.24M9.9 5.1A10.9 10.9 0 0 1 12 5c7 0 10.5 7 10.5 7a13.6 13.6 0 0 1-3.15 3.9M6.5 6.6C3.6 8.4 1.5 12 1.5 12a13.5 13.5 0 0 0 5.4 5.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="login-form-row">
+              <label class="checkbox-row"><input type="checkbox" id="rememberMeCheck"><span>Remember me</span></label>
+              <button type="button" class="link-btn-plain" id="forgotPasswordBtn">Forgot password?</button>
+            </div>
+            <button class="btn btn-primary btn-block" type="submit">Log In</button>
+          </form>
+
+          <div class="login-divider"><span>or</span></div>
+          <button class="btn btn-ghost btn-block" id="demoLoginBtn">Try the Demo Login</button>
+
+          <p class="login-switch">New to Ledger? <button type="button" class="link-btn-plain" id="showSignupBtn">Create an account</button></p>
+        </section>
+
+        <!-- ---- CREATE ACCOUNT PANEL ---- -->
+        <section class="login-panel" id="signupPanel" hidden>
+          <h1>Create your account</h1>
+          <p class="login-sub">Set up Ledger in a few seconds. Everything stays on this device.</p>
+
+          <div class="login-demo-notice">
+            <strong>Demo mode.</strong> Account creation is local-only — there's no server. Please don't reuse a password from another site.
+          </div>
+
+          <form id="signupForm" class="login-form" novalidate>
+            <div class="field"><label for="signupName">Your name</label><input id="signupName" required placeholder="e.g. Ayesha Khan" autocomplete="name"></div>
+            <div class="field"><label for="signupEmail">Email</label><input id="signupEmail" type="email" required placeholder="you@example.com" autocomplete="email"></div>
+            <div class="field">
+              <label for="signupPassword">Password</label>
+              <div class="password-field">
+                <input id="signupPassword" type="password" required minlength="4" placeholder="Create a password" autocomplete="new-password">
+                <button type="button" class="password-toggle" id="signupPasswordToggle" aria-label="Show password">
+                  <svg class="pw-eye-open" viewBox="0 0 24 24"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+                  <svg class="pw-eye-closed" viewBox="0 0 24 24" hidden><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.24 4.24M9.9 5.1A10.9 10.9 0 0 1 12 5c7 0 10.5 7 10.5 7a13.6 13.6 0 0 1-3.15 3.9M6.5 6.6C3.6 8.4 1.5 12 1.5 12a13.5 13.5 0 0 0 5.4 5.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-block" type="submit">Create Account</button>
+          </form>
+
+          <p class="login-switch">Already have an account? <button type="button" class="link-btn-plain" id="showLoginBtn">Log in</button></p>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+</div>
+
+<div class="app-shell" id="appShell" hidden>
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="26" height="26">
+          <defs><linearGradient id="markSidebar" x1="0" y1="0" x2="32" y2="32"><stop offset="0" stop-color="#4338CA"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+          <rect width="32" height="32" rx="9" fill="url(#markSidebar)"/>
+          <path d="M6 22.5c3.6-2 8-2 10 .4 2-2.4 6.4-2.4 10-.4V11c-3.6-2-8-2-10 .4C14 9 9.6 9 6 11v11.5Z" fill="#fff" fill-opacity="0.94"/>
+          <path d="M9 16.2l4-5 3 3.4L22 8" stroke="#14B8A6" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="22.4" cy="7.3" r="1.7" fill="#14B8A6"/>
+        </svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-name">Ledger</span>
+        <span class="brand-tagline">Learn. Plan. Achieve.</span>
+      </span>
+    </div>
+
+    <nav class="nav" id="mainNav" aria-label="Primary">
+      <button class="nav-item is-active" data-section="dashboard">
+        <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"/></svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-item" data-section="planner">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Study Planner</span>
+      </button>
+      <button class="nav-item" data-section="assignments">
+        <svg viewBox="0 0 24 24"><path d="M9 2h6a1 1 0 0 1 1 1v2H8V3a1 1 0 0 1 1-1Zm-3 4h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm2 6h8m-8 4h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Assignments</span>
+      </button>
+      <button class="nav-item" data-section="timetable">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 2v4M16 2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Timetable</span>
+      </button>
+      <button class="nav-item" data-section="exams">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2M9 2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Exam Countdown</span>
+      </button>
+      <button class="nav-item" data-section="gpa">
+        <svg viewBox="0 0 24 24"><path d="M4 20V10m7 10V4m7 16v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>GPA / CGPA</span>
+      </button>
+      <button class="nav-item" data-section="percentage">
+        <svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17" cy="17" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Percentage</span>
+      </button>
+      <button class="nav-item" data-section="attendance">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        <span>Attendance</span>
+      </button>
+      <button class="nav-item" data-section="notes">
+        <svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5V3Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 9h6M9 13h6M9 17h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Notes</span>
+      </button>
+      <button class="nav-item" data-section="flashcards">
+        <svg viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="7" y="10" width="14" height="10" rx="2" fill="var(--surface)" stroke="currentColor" stroke-width="2"/></svg>
+        <span>Flashcards</span>
+      </button>
+      <button class="nav-item" data-section="quiz">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.9.4-1 1-1 1.9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="0.9"/></svg>
+        <span>Quiz Practice</span>
+      </button>
+      <button class="nav-item" data-section="pomodoro">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9 2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Pomodoro</span>
+      </button>
+      <button class="nav-item" data-section="progress">
+        <svg viewBox="0 0 24 24"><path d="M4 19h16M7 19V9m5 10V5m5 14v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Progress</span>
+      </button>
+      <button class="nav-item" data-section="settings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="streak-chip">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 2c1 4-4 5-4 9a4 4 0 0 0 8 0c0-1.5-.7-2-1-3 1.5.5 3 2.4 3 5a6 6 0 0 1-12 0C6 8 10 6 12 2Z" fill="var(--warning)"/></svg>
+        <span id="sidebarStreak">0 day streak</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main-col">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="topbar-title">
+        <h1 id="sectionTitle">Dashboard</h1>
+        <p id="sectionSubtitle">Here's where your semester stands today.</p>
+      </div>
+      <div class="topbar-actions">
+        <div class="clock" id="clockWidget">
+          <span id="clockTime">--:--</span>
+          <span id="clockDate">—</span>
+        </div>
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg id="themeIconSun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg id="themeIconMoon" viewBox="0 0 24 24" hidden><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="content" id="content">
+
+      <!-- ===================== DASHBOARD ===================== -->
+      <section class="view is-active" id="view-dashboard" data-view="dashboard">
+        <div class="hero-banner">
+          <div>
+            <p class="hero-eyebrow" id="heroGreeting">Good afternoon</p>
+            <h2 id="heroWelcome">Welcome back, Student</h2>
+            <div class="hero-quote-row">
+              <p class="hero-quote" id="motivationQuote">"Small, consistent effort beats last-minute cramming."</p>
+              <button class="quote-refresh-btn" id="quoteRefreshBtn" type="button" title="Show another quote" aria-label="Show another quote">
+                <svg viewBox="0 0 24 24"><path d="M20 11A8 8 0 1 0 18.5 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <p class="hero-quote-caption">New motivation every day</p>
+          </div>
+          <div class="hero-focus" id="todaysFocus">
+            <span class="hero-focus-label">Today's focus</span>
+            <span class="hero-focus-value" id="todaysFocusValue">No task set</span>
+          </div>
+        </div>
+
+        <div class="card onboarding-card" id="onboardingCard" hidden>
+          <div class="card-head">
+            <h3>Getting started with Ledger</h3>
+            <button class="btn btn-ghost btn-sm" id="onboardingDismissBtn">Dismiss</button>
+          </div>
+          <p class="muted">Everything here is saved locally in this browser — no sign-up needed. A few quick steps to get set up:</p>
+          <div class="onboarding-checklist" id="onboardingChecklist"></div>
+        </div>
+
+        <div class="stat-grid" id="statGrid"><!-- injected --></div>
+
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-head"><h3>Today's Classes</h3></div>
+            <div class="list" id="todayClassesList"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Upcoming Assignments</h3><button class="link-btn" data-goto="assignments">View all</button></div>
+            <div class="list" id="upcomingAssignmentsList"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Upcoming Exams</h3><button class="link-btn" data-goto="exams">View all</button></div>
+            <div class="list" id="upcomingExamsList"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Pending Tasks</h3><button class="link-btn" data-goto="planner">View all</button></div>
+            <div class="list" id="pendingTasksList"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>Quick Actions</h3></div>
+          <div class="quick-actions">
+            <button class="quick-action" data-goto="planner"><span>+</span>Add Task</button>
+            <button class="quick-action" data-goto="assignments"><span>+</span>Add Assignment</button>
+            <button class="quick-action" data-goto="exams"><span>+</span>Add Exam</button>
+            <button class="quick-action" data-goto="notes"><span>+</span>New Note</button>
+            <button class="quick-action" data-goto="pomodoro"><span>▶</span>Start Studying</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STUDY PLANNER ===================== -->
+      <section class="view" id="view-planner" data-view="planner">
+        <div class="card">
+          <div class="card-head"><h3>Add a Study Task</h3></div>
+          <form id="taskForm" class="form-grid">
+            <div class="field"><label for="taskSubject">Subject</label><input id="taskSubject" required placeholder="e.g. Data Structures"></div>
+            <div class="field"><label for="taskGoal">Study goal</label><input id="taskGoal" required placeholder="e.g. Revise linked lists"></div>
+            <div class="field"><label for="taskDate">Date &amp; time</label><input id="taskDate" type="datetime-local" required></div>
+            <div class="field"><label for="taskPriority">Priority</label>
+              <select id="taskPriority"><option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option></select>
+            </div>
+            <button class="btn btn-primary" type="submit">Add Task</button>
+          </form>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <h3>Your Tasks</h3>
+            <div class="filter-group" id="taskFilters">
+              <button class="chip is-active" data-filter="all">All</button>
+              <button class="chip" data-filter="pending">Pending</button>
+              <button class="chip" data-filter="completed">Completed</button>
+            </div>
+          </div>
+          <div class="list" id="taskList"></div>
+        </div>
+      </section>
+
+      <!-- ===================== ASSIGNMENTS ===================== -->
+      <section class="view" id="view-assignments" data-view="assignments">
+        <div class="card">
+          <div class="card-head"><h3>Add Assignment</h3></div>
+          <form id="assignmentForm" class="form-grid">
+            <div class="field"><label for="asgTitle">Title</label><input id="asgTitle" required placeholder="e.g. Algorithms Assignment 3"></div>
+            <div class="field"><label for="asgSubject">Subject</label><input id="asgSubject" required placeholder="e.g. DAA"></div>
+            <div class="field span-2"><label for="asgDesc">Description</label><textarea id="asgDesc" rows="2" placeholder="Optional details"></textarea></div>
+            <div class="field"><label for="asgDeadline">Deadline</label><input id="asgDeadline" type="datetime-local" required></div>
+            <div class="field"><label for="asgPriority">Priority</label>
+              <select id="asgPriority"><option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option></select>
+            </div>
+            <button class="btn btn-primary" type="submit">Add Assignment</button>
+          </form>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <h3>Assignments</h3>
+            <div class="filter-group" id="assignmentFilters">
+              <button class="chip is-active" data-filter="all">All</button>
+              <button class="chip" data-filter="pending">Pending</button>
+              <button class="chip" data-filter="overdue">Overdue</button>
+              <button class="chip" data-filter="completed">Completed</button>
+            </div>
+          </div>
+          <div class="list" id="assignmentList"></div>
+        </div>
+      </section>
+
+      <!-- ===================== TIMETABLE ===================== -->
+      <section class="view" id="view-timetable" data-view="timetable">
+        <div class="card">
+          <div class="card-head"><h3>Add a Class</h3></div>
+          <form id="classForm" class="form-grid">
+            <div class="field"><label for="classDay">Day</label>
+              <select id="classDay">
+                <option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+              </select>
+            </div>
+            <div class="field"><label for="classSubject">Subject</label><input id="classSubject" required></div>
+            <div class="field"><label for="classTime">Time</label><input id="classTime" type="time" required></div>
+            <div class="field"><label for="classRoom">Room</label><input id="classRoom" placeholder="e.g. Room 204"></div>
+            <div class="field"><label for="classTeacher">Teacher</label><input id="classTeacher" placeholder="e.g. Dr. Ahmed"></div>
+            <button class="btn btn-primary" type="submit">Add Class</button>
+          </form>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Weekly Timetable</h3></div>
+          <div class="timetable-grid" id="timetableGrid"></div>
+        </div>
+      </section>
+
+      <!-- ===================== EXAM COUNTDOWN ===================== -->
+      <section class="view" id="view-exams" data-view="exams">
+        <div class="card">
+          <div class="card-head"><h3>Add Exam</h3></div>
+          <form id="examForm" class="form-grid">
+            <div class="field"><label for="examName">Exam name</label><input id="examName" required placeholder="e.g. Midterm"></div>
+            <div class="field"><label for="examSubject">Subject</label><input id="examSubject" required></div>
+            <div class="field"><label for="examDate">Date &amp; time</label><input id="examDate" type="datetime-local" required></div>
+            <button class="btn btn-primary" type="submit">Add Exam</button>
+          </form>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Countdowns</h3></div>
+          <div class="countdown-grid" id="examList"></div>
+        </div>
+      </section>
+
+      <!-- ===================== GPA / CGPA ===================== -->
+      <section class="view" id="view-gpa" data-view="gpa">
+        <div class="card">
+          <div class="card-head"><h3>Semester GPA Calculator</h3><button class="btn btn-ghost btn-sm" id="gpaResetBtn">Reset</button></div>
+          <div class="table-wrap">
+            <table class="calc-table" id="gpaTable">
+              <thead><tr><th>Subject</th><th>Credit Hours</th><th>Grade</th><th></th></tr></thead>
+              <tbody id="gpaTbody"></tbody>
+            </table>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="addGpaRowBtn">+ Add Subject</button>
+          <div class="result-banner">
+            <div><span class="result-label">Semester GPA</span><span class="result-value" id="gpaResult">0.00</span></div>
+            <button class="btn btn-primary btn-sm" id="saveSemesterBtn">Save Semester to CGPA</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Cumulative CGPA</h3></div>
+          <div class="list" id="cgpaHistoryList"></div>
+          <div class="result-banner">
+            <div><span class="result-label">Overall CGPA</span><span class="result-value" id="cgpaResult">0.00</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== PERCENTAGE ===================== -->
+      <section class="view" id="view-percentage" data-view="percentage">
+        <div class="card narrow">
+          <div class="card-head"><h3>Percentage &amp; Grade Calculator</h3></div>
+          <form id="percentForm" class="form-grid">
+            <div class="field"><label for="marksObtained">Marks obtained</label><input id="marksObtained" type="number" min="0" required></div>
+            <div class="field"><label for="marksTotal">Total marks</label><input id="marksTotal" type="number" min="1" required></div>
+            <button class="btn btn-primary" type="submit">Calculate</button>
+          </form>
+          <div class="result-banner" id="percentResultBanner" hidden>
+            <div><span class="result-label">Percentage</span><span class="result-value" id="percentResult">0%</span></div>
+            <div><span class="result-label">Grade</span><span class="result-value" id="percentGrade">-</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== ATTENDANCE ===================== -->
+      <section class="view" id="view-attendance" data-view="attendance">
+        <div class="card narrow">
+          <div class="card-head"><h3>Attendance Calculator</h3></div>
+          <form id="attendanceForm" class="form-grid">
+            <div class="field"><label for="attTotal">Total classes held</label><input id="attTotal" type="number" min="0" required></div>
+            <div class="field"><label for="attAttended">Classes attended</label><input id="attAttended" type="number" min="0" required></div>
+            <div class="field"><label for="attTarget">Target attendance %</label><input id="attTarget" type="number" min="1" max="100" value="75" required></div>
+            <button class="btn btn-primary" type="submit">Calculate</button>
+          </form>
+          <div id="attendanceResults" class="attendance-results" hidden></div>
+        </div>
+      </section>
+
+      <!-- ===================== NOTES ===================== -->
+      <section class="view" id="view-notes" data-view="notes">
+        <div class="card">
+          <div class="card-head">
+            <h3>Notes</h3>
+            <div class="card-head-actions">
+              <input type="search" id="noteSearch" placeholder="Search notes…" class="search-input">
+              <button class="btn btn-primary btn-sm" id="newNoteBtn">+ New Note</button>
+            </div>
+          </div>
+          <div class="notes-grid" id="notesGrid"></div>
+        </div>
+      </section>
+
+      <!-- Note editor modal -->
+      <div class="modal-overlay" id="noteModal" hidden>
+        <div class="modal modal-wide" role="dialog" aria-modal="true">
+          <h3 id="noteModalTitle">New Note</h3>
+          <form id="noteForm" class="form-grid">
+            <input type="hidden" id="noteId">
+            <div class="field"><label for="noteTitle">Title</label><input id="noteTitle" required></div>
+            <div class="field"><label for="noteSubject">Subject</label><input id="noteSubject" required></div>
+            <div class="field span-2"><label for="noteTags">Tags (comma separated)</label><input id="noteTags" placeholder="e.g. important, revision"></div>
+            <div class="field span-2"><label for="noteContent">Content</label><textarea id="noteContent" rows="6" required></textarea></div>
+            <div class="modal-actions span-2">
+              <button type="button" class="btn btn-ghost" id="noteCancelBtn">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save Note</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ===================== FLASHCARDS ===================== -->
+      <section class="view" id="view-flashcards" data-view="flashcards">
+        <div class="card">
+          <div class="card-head"><h3>Create Flashcard</h3></div>
+          <form id="flashcardForm" class="form-grid">
+            <div class="field"><label for="fcQuestion">Question</label><input id="fcQuestion" required></div>
+            <div class="field"><label for="fcAnswer">Answer</label><input id="fcAnswer" required></div>
+            <button class="btn btn-primary" type="submit">Add Flashcard</button>
+          </form>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Review</h3><span class="muted" id="fcCounter">0 / 0</span></div>
+          <div class="flashcard-stage">
+            <div class="flashcard" id="flashcardEl">
+              <div class="flashcard-face flashcard-front">
+                <span class="flashcard-label">Question</span>
+                <p id="fcFrontText">Add your first flashcard to begin.</p>
+              </div>
+              <div class="flashcard-face flashcard-back">
+                <span class="flashcard-label">Answer</span>
+                <p id="fcBackText"></p>
+              </div>
+            </div>
+          </div>
+          <div class="flashcard-controls">
+            <button class="btn btn-ghost" id="fcPrevBtn">◀ Previous</button>
+            <button class="btn btn-secondary" id="fcFlipBtn">Flip Card</button>
+            <button class="btn btn-ghost" id="fcNextBtn">Next ▶</button>
+            <button class="btn btn-danger btn-sm" id="fcDeleteBtn">Delete Card</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== QUIZ ===================== -->
+      <section class="view" id="view-quiz" data-view="quiz">
+        <div class="card" id="quizIntroCard">
+          <div class="card-head"><h3>Quiz Practice</h3></div>
+          <p class="muted">Test yourself with a quick multiple-choice quiz. Each question is timed at 20 seconds.</p>
+          <button class="btn btn-primary" id="startQuizBtn">Start Quiz</button>
+        </div>
+        <div class="card" id="quizActiveCard" hidden>
+          <div class="quiz-head">
+            <span id="quizProgress">Question 1 / 5</span>
+            <span class="quiz-timer" id="quizTimer">20s</span>
+            <span id="quizScoreLive">Score: 0</span>
+          </div>
+          <h3 id="quizQuestionText"></h3>
+          <div class="quiz-options" id="quizOptions"></div>
+          <div id="quizFeedback" class="quiz-feedback" hidden></div>
+        </div>
+        <div class="card" id="quizResultCard" hidden>
+          <div class="card-head"><h3>Quiz Complete</h3></div>
+          <p class="result-value" id="quizFinalScore">0 / 0</p>
+          <p id="quizResultMsg" class="muted"></p>
+          <button class="btn btn-primary" id="restartQuizBtn">Restart Quiz</button>
+        </div>
+      </section>
+
+      <!-- ===================== POMODORO ===================== -->
+      <section class="view" id="view-pomodoro" data-view="pomodoro">
+        <div class="card pomodoro-card">
+          <div class="pomodoro-modes" id="pomodoroModes">
+            <button class="chip is-active" data-mode="focus">Focus</button>
+            <button class="chip" data-mode="short">Short Break</button>
+            <button class="chip" data-mode="long">Long Break</button>
+          </div>
+          <div class="pomodoro-ring-wrap">
+            <svg viewBox="0 0 200 200" class="pomodoro-ring">
+              <circle cx="100" cy="100" r="88" class="ring-track"/>
+              <circle cx="100" cy="100" r="88" class="ring-progress" id="pomodoroRingProgress"/>
+            </svg>
+            <div class="pomodoro-time" id="pomodoroTime">25:00</div>
+          </div>
+          <div class="pomodoro-controls">
+            <button class="btn btn-primary" id="pomodoroStartBtn">Start</button>
+            <button class="btn btn-ghost" id="pomodoroPauseBtn">Pause</button>
+            <button class="btn btn-ghost" id="pomodoroResetBtn">Reset</button>
+          </div>
+          <div class="pomodoro-stats">
+            <div><span id="pomodoroSessions">0</span><label>Sessions today</label></div>
+            <div><span id="pomodoroStreak">0</span><label>Day streak</label></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Customize Durations (minutes)</h3></div>
+          <form id="pomodoroSettingsForm" class="form-grid">
+            <div class="field"><label for="focusMinutes">Focus</label><input id="focusMinutes" type="number" min="1" max="180" value="25"></div>
+            <div class="field"><label for="shortMinutes">Short break</label><input id="shortMinutes" type="number" min="1" max="60" value="5"></div>
+            <div class="field"><label for="longMinutes">Long break</label><input id="longMinutes" type="number" min="1" max="90" value="15"></div>
+            <button class="btn btn-secondary" type="submit">Save Durations</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ===================== PROGRESS ===================== -->
+      <section class="view" id="view-progress" data-view="progress">
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-head"><h3>Weekly Study Hours</h3></div>
+            <div class="bar-chart" id="studyHoursChart"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Assignments &amp; Tasks</h3></div>
+            <div class="list" id="progressCompletionList"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Quiz Performance</h3></div>
+            <div class="bar-chart" id="quizChart"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Overview Rings</h3></div>
+            <div class="ring-row" id="overviewRings"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== SETTINGS ===================== -->
+      <section class="view" id="view-settings" data-view="settings">
+        <div class="card narrow">
+          <div class="card-head"><h3>Profile</h3></div>
+          <form id="profileForm" class="form-grid">
+            <div class="field"><label for="studentName">Your name</label><input id="studentName" placeholder="e.g. Ayesha Khan"></div>
+            <div class="field"><label for="targetAttendance">Default attendance target (%)</label><input id="targetAttendance" type="number" min="1" max="100" value="75"></div>
+            <button class="btn btn-primary" type="submit">Save Profile</button>
+          </form>
+        </div>
+<div class="card narrow">
+          <div class="card-head"><h3>Account</h3></div>
+          <div class="settings-row">
+            <div><strong id="accountEmailDisplay">Signed in</strong><p class="muted" id="accountModeDisplay">Demo session</p></div>
+            <button class="btn btn-ghost btn-sm" id="logoutBtn">Log Out</button>
+          </div>
+        </div>
+        <div class="card narrow">
+          <div class="card-head"><h3>Appearance</h3></div>
+          <div class="settings-row">
+            <div><strong>Dark Mode</strong><p class="muted">Switch between light and dark themes.</p></div>
+            <label class="switch"><input type="checkbox" id="darkModeSwitch"><span class="switch-track"></span></label>
+          </div>
+        </div>
+        <div class="card narrow">
+          <div class="card-head"><h3>Data</h3></div>
+          <p class="muted">All your data is stored locally in this browser only.</p>
+          <div class="settings-actions">
+            <button class="btn btn-ghost" id="exportDataBtn">Export Data (JSON)</button>
+            <button class="btn btn-danger" id="clearDataBtn">Clear All Data</button>
+          </div>
+        </div>
+        <div class="card narrow">
+          <div class="card-head"><h3>Legal &amp; Contact</h3></div>
+          <p class="muted">Placeholder pages for this MVP testing phase.</p>
+          <div class="settings-actions">
+            <a class="btn btn-ghost btn-sm" href="privacy.html">Privacy Policy</a>
+            <a class="btn btn-ghost btn-sm" href="terms.html">Terms &amp; Conditions</a>
+            <a class="btn btn-ghost btn-sm" href="contact.html">Contact</a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ============ AI STUDY ASSISTANT (CHATBOT) ============
+       Lives inside #appShell so it automatically hides on the
+       login screen (app-shell has [hidden] until the user logs in)
+       and appears once the student is inside the app, matching
+       every other authenticated feature. -->
+
+  <!-- Floating toggle button -->
+  <button class="ai-fab" id="aiFabBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="aiChatWindow" aria-label="Open AI Study Assistant">
+    <svg class="ai-fab-icon-open" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0-9 9c0 1.6.43 3.1 1.18 4.4L3 21l4.8-1.15A9 9 0 1 0 12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="8.5" cy="12" r="1.15" fill="currentColor"/><circle cx="12" cy="12" r="1.15" fill="currentColor"/><circle cx="15.5" cy="12" r="1.15" fill="currentColor"/></svg>
+    <svg class="ai-fab-icon-close" viewBox="0 0 24 24" hidden><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <span class="ai-fab-badge" id="aiFabBadge" hidden>1</span>
+  </button>
+
+  <!-- Chat window -->
+  <section class="ai-chat" id="aiChatWindow" role="dialog" aria-modal="false" aria-labelledby="aiChatTitle" hidden>
+    <header class="ai-chat-head">
+      <div class="ai-chat-head-id">
+        <span class="ai-chat-avatar" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0-9 9c0 1.6.43 3.1 1.18 4.4L3 21l4.8-1.15A9 9 0 1 0 12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="8.5" cy="12" r="1.15" fill="currentColor"/><circle cx="12" cy="12" r="1.15" fill="currentColor"/><circle cx="15.5" cy="12" r="1.15" fill="currentColor"/></svg>
+        </span>
+        <div>
+          <h2 id="aiChatTitle">AI Study Assistant</h2>
+          <p class="ai-chat-status" id="aiChatStatus"><span class="ai-status-dot" id="aiStatusDot"></span><span id="aiStatusText">Checking connection…</span></p>
+        </div>
+      </div>
+      <div class="ai-chat-head-actions">
+        <button class="icon-btn ai-icon-btn" id="aiClearBtn" type="button" title="Clear chat" aria-label="Clear chat">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="icon-btn ai-icon-btn" id="aiCloseBtn" type="button" title="Close" aria-label="Close AI Study Assistant">
+          <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="ai-quick-actions" id="aiQuickActions" role="group" aria-label="Quick actions">
+      <button class="ai-quick-btn" data-prompt="explain">📚 Explain Topic</button>
+      <button class="ai-quick-btn" data-prompt="notes">📝 Make Notes</button>
+      <button class="ai-quick-btn" data-prompt="quiz">🧠 Generate Quiz</button>
+      <button class="ai-quick-btn" data-prompt="solve">🔢 Solve Problem</button>
+      <button class="ai-quick-btn" data-prompt="summarize">📖 Summarize</button>
+    </div>
+
+    <div class="ai-chat-body" id="aiChatBody" aria-live="polite">
+      <!-- Empty-state welcome message, replaced once there is history -->
+      <div class="ai-empty-state" id="aiEmptyState">
+        <span class="ai-empty-icon" aria-hidden="true">🎓</span>
+        <h3>Hi, I'm your Study Assistant!</h3>
+        <p>Ask me to explain a topic, make notes, build a quiz, solve a problem, or summarize your notes — I'm here to help you actually understand it.</p>
+      </div>
+      <!-- Message bubbles are appended here by script.js -->
+    </div>
+
+    <form class="ai-chat-input-row" id="aiChatForm">
+      <textarea
+        id="aiChatInput"
+        class="ai-chat-input"
+        rows="1"
+        placeholder="Ask a study question…"
+        aria-label="Type your study question"
+        maxlength="4000"></textarea>
+      <button type="submit" class="ai-send-btn" id="aiSendBtn" aria-label="Send message">
+        <svg viewBox="0 0 24 24"><path d="M3 12 21 3l-6.5 18-3.5-7.5L3 12Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>
+      </button>
+    </form>
+    <p class="ai-chat-disclaimer">AI can make mistakes — double‑check important facts before an exam.</p>
+  </section>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
